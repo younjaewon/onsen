@@ -108,5 +108,4 @@ Spring Security, RestAPI개발등 더 심화적인 개발프로젝트를 진행�
 
 
 * ## 📎 Link   
-* Notion (https://www.notion.so/Onsen-a6877bc3eed04a39aafb19b08dce0249)   
 * 웹구동 영상 (https://www.youtube.com/watch?v=6CouIzfgjPc)
