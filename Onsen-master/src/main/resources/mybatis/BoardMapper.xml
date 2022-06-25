@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jang.doc.mapper.BoardMapper">
+
+<!-- 조희건 씨발 미친새낀가? -->
+	<!-- 게시판 목록 보기 -->
+<select id="getBoardList"  parameterType="SearchVO" resultType="BoardVO" > 
+  
+   SELECT  bno, title, writerid, replycnt, viewcnt, to_char(regdate, 'YYYY-MM-DD HH24:MI')                                                     
+          regdate, recommendcnt 
+   FROM  ( SELECT ROWNUM AS rnum, a.* 
+           FROM ( SELECT * FROM   bbs_board  WHERE  del_yn='n' 
+
+                  <if test="keyword != null">
+       <choose>  
+          <when test="type == 'title'"> AND title like '%'||#{keyword}||'%' </when>
+          <when test="type == 'writerId'">AND writerId  like '%'||#{keyword}||'%' </when>
+          <when test="type == 'content'"> AND content  like '%'||#{keyword}||'%' </when>
+       </choose>
+       </if> 
+
+                  order by bno desc  ) a  
+         ) 
+   WHERE rnum  between #{startRow} and #{endRow} 
+      
+  </select>
+
+	<select id="getTotalRow" parameterType="SearchVO"  resultType="int">
+       SELECT count(*) AS totalrow 
+       FROM  bbs_board  
+       WHERE del_yn='n' 
+       <if test="keyword != null">
+           <choose>  
+                <when test="type == 'title'">AND title like '%'||#{keyword}||'%' </when>
+                <when test="type == 'writerId'">AND writerId  like '%'||#{keyword}||'%' </when>
+                <when test="type == 'content'">AND content  like '%'||#{keyword}||'%' </when>
+            </choose>
+        </if> 
+        
+    </select>
+    
+    <insert id = "writeArticle" keyProperty = "bno">
+		<selectKey keyProperty = "bno" resultType = "int" order = "BEFORE">
+			SELECT COALESCE(MAX(bno), 0) + 1 AS bno FROM bbs_board
+		</selectKey>
+		
+		INSERT INTO bbs_board (bno, title, content, writerId)
+		VALUES (#{bno}, #{title}, #{content}, #{writerId} )
+	
+	</insert>
+	
+	<insert id = "insertFile" keyProperty = "fno">
+		<selectKey keyProperty = "fno" resultType = "int" order = "BEFORE">
+			SELECT COALESCE(MAX(fno), 0) + 1 AS fno FROM bbs_file
+		</selectKey>
+		
+		INSERT INTO bbs_file (fno, bno, ofilename, sfilename, filesize)
+		VALUES (#{fno}, #{bno}, #{ofilename}, #{sfilename}, #{filesize})
+	
+	</insert>
+    
+    
+    <select id="getBoardView" resultType="int">
+		select coalesce(max(bno),
+		0) as bno
+		from bbs_boardview
+		WHERE userId = #{userId} and bno = #{bno}
+	</select>
+	
+	<update id="incrementViewCnt">
+		UPDATE bbs_board
+		SET viewcnt = viewcnt + 1
+		WHERE bno =
+		#{bno}
+	</update>
+
+<insert id="addBoardView" keyProperty="bvno">
+		<selectKey keyProperty="bvno" resultType="int"
+			order="BEFORE">
+			select coalesce(max(bvno), 0) + 1 as bvno
+			from bbs_boardview
+		</selectKey>
+		insert into bbs_boardview (bvno, bno, userId, mem_yn)
+		values(#{bvno},
+		#{bno}, #{userId}, #{mem_yn})
+	</insert>
+	
+	<select id="getArticle" resultType="BoardVO">
+		SELECT bno, title, content,
+		writerId, to_char(regDate, 'YYYY-MM-DD HH24:MI')regDate, viewcnt,
+		replycnt, recommendcnt
+		FROM bbs_board
+		WHERE bno=#{bno}
+	</select>
+	
+	<select id="getReplyList" resultType="ReplyVO">
+		select rno, bno, content,
+		recommendcnt, multicnt, to_char(regDate, 'yyyy-mm-dd hh24:mi')
+		regDate, writerId
+		from bbs_reply
+		WHERE bno = #{bno} and del_yn='n'
+	</select>
+	
+	<select id="getFileList" resultType="AttFileVO">
+		SELECT fno, bno, ofilename,
+		sfilename, filesize
+		FROM bbs_file
+		WHERE bno = #{bno}
+	</select>
+	
+	<update id="updateArticle">
+		UPDATE bbs_board
+		SET title = #{title}, content =
+		#{content}, writerId = #{writerId},
+		viewcnt = #{viewcnt}
+		WHERE bno =
+		#{bno}
+	</update>
+	
+	<delete id="deleteArticle">
+		DELETE FROM bbs_board
+		WHERE bno = #{bno}
+	</delete>
+	
+	<delete id="deleteFile">
+		delete from bbs_file
+		WHERE fno = #{fno}
+	</delete>
+	<delete id="deleteFileBybno">
+		delete from bbs_file
+		WHERE bno = #{bno}
+	</delete>
+<select id="getFileName" resultType="String" parameterType="int">
+		SELECT ofilename
+		FROM bbs_file
+		WHERE fno = #{fno}
+	</select>
+</mapper>

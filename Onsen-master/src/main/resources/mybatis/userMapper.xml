@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userMapper">
+
+	<insert id="insertUser" parameterType="com.jang.doc.model.User">
+		INSERT INTO member_tbl(no, id, pass, name, zip, addr1, addr2, phone, email)
+		VALUES(seq_no.nextval, #{id}, #{pass}, #{name}, #{zip}, #{addr1}, #{addr2}, #{phone}, #{email})
+	</insert>
+	
+	
+	<select id="getUser" resultType="com.jang.doc.model.User" parameterType="string">
+		SELECT 	* 
+		FROM 	member_tbl 
+		WHERE 	id=#{value}
+	</select>
+	
+	<update id="updateUser" parameterType="com.jang.doc.model.User">
+		update member_tbl set pass=#{pass}, zip=replace(#{zip}, ' ', ''), addr1=#{addr1},addr2=#{addr2}, phone=#{phone}, email=#{email} 
+		where id=#{id}
+	</update>
+		
+	<select id="findId" resultType="com.jang.doc.model.User" parameterType="com.jang.doc.model.User">
+		select * 
+		from member_tbl 
+		where name=#{name} and email=#{email}
+	</select>
+	
+	<select id="findPass" resultType="com.jang.doc.model.User" parameterType="com.jang.doc.model.User" >
+		select * 
+		from member_tbl 
+		where id=#{id} and email=#{email}
+	</select>
+	
+	<delete id="deleteUser" parameterType="string">
+		delete from member_tbl 
+		where id=#{value}
+	</delete>
+	
+	<update id="updatePass" parameterType="com.jang.doc.model.User">
+		update member_tbl set pass=#{pass} 
+		where id=#{id}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>
